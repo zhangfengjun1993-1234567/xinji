@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+    <!-- ===== 微信 / Open Graph 分享卡片 ===== -->
+    <meta property="og:title" content="心记 · 每日日记" />
+    <meta property="og:description" content="记录日常，发掘优势，获得人生教练分析。你的私人日记本，打开即用。" />
+    <meta property="og:image" content="og-image.png" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="心记" />
+    <meta name="description" content="心记——每日日记应用，引导写作、语音录入、每周优势分析、双周教练报告" />
+
+    <!-- ===== PWA / 移动端支持 ===== -->
+    <meta name="theme-color" content="#FAF8F5" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="心记" />
+    <link rel="apple-touch-icon" href="og-image.png" />
+    <link rel="manifest" href="manifest.json" />
+
+    <title>心记 · 每日日记</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="app">
+        <!-- Header -->
+        <header id="app-header">
+            <div class="header-left">
+                <h1>心记</h1>
+            </div>
+            <div class="header-right">
+                <span id="header-date"></span>
+                <span id="header-streak"></span>
+                <button id="btn-share" class="share-btn" title="分享给朋友" style="display:none;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+                </button>
+            </div>
+        </header>
+
+        <!-- Write View -->
+        <main id="view-write" class="view active">
+            <div class="write-toolbar">
+                <button id="btn-guided" class="tool-btn" title="引导写作">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+                    <span>引导写作</span>
+                </button>
+                <button id="btn-voice" class="tool-btn" title="语音输入">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="2" width="6" height="11" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="19" x2="12" y2="22"/></svg>
+                    <span>语音输入</span>
+                </button>
+            </div>
+
+            <div class="mood-selector">
+                <span class="mood-label">今日心情</span>
+                <div class="mood-options" id="mood-options">
+                    <button class="mood-btn" data-mood="great" title="很棒">
+                        <span class="mood-icon">😊</span>
+                    </button>
+                    <button class="mood-btn" data-mood="good" title="不错">
+                        <span class="mood-icon">🙂</span>
+                    </button>
+                    <button class="mood-btn" data-mood="okay" title="一般">
+                        <span class="mood-icon">😐</span>
+                    </button>
+                    <button class="mood-btn" data-mood="bad" title="不好">
+                        <span class="mood-icon">😔</span>
+                    </button>
+                    <button class="mood-btn" data-mood="terrible" title="很差">
+                        <span class="mood-icon">😢</span>
+                    </button>
+                </div>
+                <span class="weather-select">
+                    <select id="weather-select">
+                        <option value="">天气</option>
+                        <option value="sunny">☀️ 晴</option>
+                        <option value="cloudy">⛅ 多云</option>
+                        <option value="rainy">🌧️ 雨</option>
+                        <option value="snowy">❄️ 雪</option>
+                        <option value="windy">🌬️ 风</option>
+                    </select>
+                </span>
+            </div>
+
+            <div class="editor-area">
+                <textarea id="diary-input" placeholder="今天发生了什么？写下你的故事…" rows="12"></textarea>
+                <div id="voice-indicator" class="voice-indicator hidden">
+                    <div class="voice-pulse"></div>
+                    <span>正在聆听...</span>
+                </div>
+            </div>
+
+            <div class="write-actions">
+                <span id="char-count" class="char-count">0 字</span>
+                <button id="btn-save" class="btn-primary">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                    保存日记
+                </button>
+            </div>
+
+            <!-- 数据备份入口 -->
+            <div class="backup-bar">
+                <button id="btn-export" class="backup-link" title="导出数据备份">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                    备份数据
+                </button>
+                <button id="btn-import" class="backup-link" title="导入数据备份">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                    恢复数据
+                </button>
+                <input type="file" id="import-file" accept=".json" style="display:none">
+            </div>
+        </main>
+
+        <!-- History View -->
+        <main id="view-history" class="view">
+            <div class="history-header">
+                <h2>日记历史</h2>
+                <div class="history-nav">
+                    <button id="hist-prev" class="icon-btn">&larr;</button>
+                    <span id="hist-range"></span>
+                    <button id="hist-next" class="icon-btn">&rarr;</button>
+                </div>
+            </div>
+            <div id="history-list" class="history-list"></div>
+            <div id="history-empty" class="empty-state">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.4"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+                <p>还没有日记记录</p>
+                <p class="sub">开始写第一篇吧</p>
+            </div>
+        </main>
+
+        <!-- Weekly Strengths View -->
+        <main id="view-weekly" class="view">
+            <div class="weekly-header">
+                <h2>每周优势库</h2>
+                <div class="week-nav">
+                    <button id="week-prev" class="icon-btn">&larr;</button>
+                    <span id="week-label"></span>
+                    <button id="week-next" class="icon-btn">&rarr;</button>
+                </div>
+            </div>
+            <div id="weekly-content"></div>
+            <div id="weekly-empty" class="empty-state">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.4"><circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 1 0-16 0"/></svg>
+                <p>暂无本周日记数据</p>
+                <p class="sub">坚持写日记，每周会自动分析你的优势</p>
+            </div>
+        </main>
+
+        <!-- Coaching View -->
+        <main id="view-coaching" class="view">
+            <div class="coaching-header">
+                <h2>双周教练报告</h2>
+                <div class="coaching-nav">
+                    <button id="coach-prev" class="icon-btn">&larr;</button>
+                    <span id="coach-label"></span>
+                    <button id="coach-next" class="icon-btn">&rarr;</button>
+                </div>
+            </div>
+            <button id="btn-analyze" class="btn-secondary">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                生成教练报告
+            </button>
+            <div id="coaching-content"></div>
+            <div id="coaching-empty" class="empty-state">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.4"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                <p>暂无双周数据</p>
+                <p class="sub">至少需要两周的日记才能生成教练报告</p>
+            </div>
+        </main>
+
+        <!-- Guided Mode Modal -->
+        <div id="guided-modal" class="modal hidden">
+            <div class="modal-overlay"></div>
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>引导写作</h3>
+                    <div class="modal-progress">
+                        <span id="guided-progress-text">1 / 8</span>
+                        <div class="progress-bar">
+                            <div id="guided-progress-bar" class="progress-fill"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-body" id="guided-body">
+                    <div class="guided-question" id="guided-question"></div>
+                    <textarea id="guided-answer" placeholder="在这里写下你的回答…" rows="4"></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button id="guided-prev" class="btn-text" disabled>上一步</button>
+                    <div class="modal-footer-right">
+                        <button id="guided-skip" class="btn-text">跳过</button>
+                        <button id="guided-next" class="btn-primary">下一步</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Entry Detail Modal -->
+        <div id="detail-modal" class="modal hidden">
+            <div class="modal-overlay"></div>
+            <div class="modal-content modal-content-wide">
+                <div class="modal-header">
+                    <h3 id="detail-date"></h3>
+                    <button id="detail-close" class="icon-btn">&times;</button>
+                </div>
+                <div class="modal-body" id="detail-body">
+                    <div class="detail-meta" id="detail-meta"></div>
+                    <div id="detail-content"></div>
+                    <!-- 分享单篇日记 -->
+                    <div id="detail-share-area" class="detail-share hidden">
+                        <button id="btn-share-entry" class="btn-text">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+                            分享这篇日记
+                        </button>
+                        <button id="btn-delete-entry" class="btn-text" style="color:#EF4444;">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                            删除
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Navigation -->
+        <nav id="bottom-nav">
+            <button class="nav-btn active" data-tab="write">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                <span>写日记</span>
+            </button>
+            <button class="nav-btn" data-tab="history">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                <span>历史</span>
+            </button>
+            <button class="nav-btn" data-tab="weekly">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                <span>优势库</span>
+            </button>
+            <button class="nav-btn" data-tab="coaching">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                <span>教练</span>
+            </button>
+        </nav>
+
+        <!-- Toast -->
+        <div id="toast" class="toast hidden"></div>
+    </div>
+
+    <script src="app.js"></script>
+    <!-- Service Worker 注册（离线可用） -->
+    <script>
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('sw.js').catch(function(err) {
+            console.log('SW registration failed (non-critical):', err);
+        });
+    }
+    </script>
+</body>
+</html>
