@@ -5,21 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
     <!-- ===== 微信 / Open Graph 分享卡片 ===== -->
-    <meta property="og:title" content="心记 · 每日日记" />
-    <meta property="og:description" content="记录日常，发掘优势，获得人生教练分析。你的私人日记本，打开即用。" />
+    <meta property="og:title" content="见己 · 每日成长日记" />
+    <meta property="og:description" content="每日记录，发现自我，看见成长。你的私人成长日记。" />
     <meta property="og:image" content="og-image.png" />
     <meta property="og:type" content="website" />
-    <meta property="og:site_name" content="心记" />
-    <meta name="description" content="心记——每日日记应用，引导写作、语音录入、每周优势分析、双周教练报告" />
+    <meta property="og:site_name" content="见己" />
+    <meta name="description" content="见己——每日日记应用，引导写作、语音录入、每周优势分析、双周教练报告" />
 
     <!-- ===== PWA / 移动端支持 ===== -->
     <meta name="theme-color" content="#FAF8F5" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-title" content="心记" />
+    <meta name="apple-mobile-web-app-title" content="见己" />
     <link rel="apple-touch-icon" href="og-image.png" />
     <link rel="manifest" href="manifest.json" />
 
-    <title>心记 · 每日日记</title>
+    <title>见己 · 每日成长日记</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -27,7 +27,7 @@
         <!-- Header -->
         <header id="app-header">
             <div class="header-left">
-                <h1>心记</h1>
+                <h1>见己</h1>
             </div>
             <div class="header-right">
                 <span id="header-date"></span>
@@ -192,6 +192,27 @@
                     <div class="modal-footer-right">
                         <button id="guided-skip" class="btn-text">跳过</button>
                         <button id="guided-next" class="btn-primary">下一步</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        
+        <!-- Daily Card Modal (每日心情卡片) -->
+        <div id="daily-card-modal" class="modal hidden">
+            <div class="modal-overlay"></div>
+            <div class="modal-content card-content">
+                <div class="daily-card" id="daily-card">
+                    <div class="card-top">
+                        <div class="card-date" id="card-date"></div>
+                        <div class="card-mood" id="card-mood"></div>
+                    </div>
+                    <div class="card-divider"></div>
+                    <div class="card-quote-area">
+                        <div class="card-quote" id="card-quote"></div>
+                    </div>
+                    <div class="card-footer-bar">
+                        <button id="card-close-btn" class="btn-primary card-btn">好的，明天继续 ✨</button>
                     </div>
                 </div>
             </div>
