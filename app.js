@@ -881,6 +881,7 @@
                     document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('selected'));
                     btn.classList.add('selected');
                     this.currentMood = btn.dataset.mood;
+                    this._applyMoodTheme(btn.dataset.mood);
                 });
             });
 
@@ -909,6 +910,9 @@
             document.getElementById('detail-close').addEventListener('click', () => {
                 document.getElementById('detail-modal').classList.add('hidden');
             });
+            document.getElementById('card-close-btn').addEventListener('click', () => this._dismissDailyCard());
+            document.getElementById('daily-card-modal').querySelector('.modal-overlay').addEventListener('click', () => this._dismissDailyCard());
+
             document.getElementById('detail-modal').querySelector('.modal-overlay').addEventListener('click', () => {
                 document.getElementById('detail-modal').classList.add('hidden');
             });
@@ -971,6 +975,7 @@
                     document.querySelectorAll('.mood-btn').forEach(b => {
                         if (b.dataset.mood === last.mood) b.classList.add('selected');
                     });
+                    this._applyMoodTheme(last.mood);
                 }
                 if (last.weather) {
                     document.getElementById('weather-select').value = last.weather;
@@ -1014,6 +1019,8 @@
             Storage.saveEntry(entry);
             this._updateHeader();
             this._showToast('日记已保存 📝');
+            // 每日心情卡片
+            this._showDailyCard(this.currentMood || 'good', content);
 
             // 清空
             textarea.value = '';
@@ -1479,6 +1486,140 @@
             this._updateHeader();
             this._updateHistory();
             this._showToast('日记已删除');
+        },
+
+
+        // ---- 每日金句库（按心情分类） ----
+        _quotes: {
+            'great': [
+                '今天也是闪闪发光的一天 ✨',
+                '你比自己想象的更有力量 💪',
+                '美好的一天，值得被记住 🌟',
+                '今天的你，真的很棒 🌈',
+                '你的光芒，照亮了今天的路 ☀️',
+                '保持这份热情，世界会为你让路 🔥',
+            ],
+            'good': [
+                '平凡的日子里，也有不平凡的光 🌅',
+                '慢慢来，一切都来得及 🌿',
+                '每一天都是一个新的开始 🌱',
+                '今天的努力，是明天的底气 📈',
+                '知足常乐，今天也不错 😊',
+                '你正在成为更好的自己 💫',
+            ],
+            'okay': [
+                '心情一般也没关系，写下来就好了 📝',
+                '平淡的日子，才是生活的底色 🏠',
+                '放松一点，你不需要时刻完美 🍃',
+                '停下来，也是一种前进 ⏸️',
+                '今天不坏，就是好天气 ☁️',
+                '给自己一点空间，慢慢调整 🌊',
+            ],
+            'bad': [
+                '天空不会一直下雨，也不会一直晴 🌈',
+                '有些情绪不需要解决，只需要被看见 👀',
+                '今天的不开心，就留在今天吧 🌙',
+                '对自己温柔一点，你值得被善待 💛',
+                '难过的时候，写下来就会好一些 ✍️',
+                '每一个低谷，都是上坡路的开始 ⛰️',
+            ],
+            'terrible': [
+                '累了就休息，没人责怪你 🛌',
+                '黑暗的时刻也会过去 🌅',
+                '你不需要一个人扛着所有 🤝',
+                '抱抱今天的自己，你已经很努力了 🫂',
+                '允许自己脆弱，也是勇敢的一种 💧',
+                '明天会更好，我保证 🌟',
+            ]
+        },
+
+        // ---- 应用心情主题（页面颜色变化） ----
+        _applyMoodTheme(mood) {
+            // 移除所有心情 class
+            ['great','good','okay','bad','terrible'].forEach(m => {
+                document.body.classList.remove('mood-' + m);
+            });
+            if (mood) {
+                document.body.classList.add('mood-' + mood);
+                // 更新 header 文字颜色
+                const h1 = document.querySelector('#app-header h1');
+                if (h1) {
+                    const moodColors = {
+                        'great': '#D97706',
+                        'good': '#059669',
+                        'okay': '#2563EB',
+                        'bad': '#7C3AED',
+                        'terrible': '#4F46E5'
+                    };
+                    h1.style.color = moodColors[mood] || '';
+                }
+            }
+            // 更新状态栏图标颜色
+            const metaTheme = document.querySelector('meta[name="theme-color"]');
+            if (metaTheme) {
+                const bgColors = {
+                    'great': '#FFFBEB',
+                    'good': '#ECFDF5',
+                    'okay': '#EFF6FF',
+                    'bad': '#F5F3FF',
+                    'terrible': '#F0F0FF'
+                };
+                metaTheme.setAttribute('content', bgColors[mood] || '#FAF8F5');
+            }
+        },
+
+        // ---- 根据心情获取每日金句 ----
+        _getDailyQuote(mood) {
+            const quotes = this._quotes[mood] || this._quotes['good'];
+            // 根据日期决定，确保同一天看到同样的话（但每次不必完全相同）
+            const today = new Date().toISOString().slice(0, 10);
+            const dayNum = today.split('-').reduce((a, b) => a + parseInt(b), 0);
+            const idx = dayNum % quotes.length;
+            // 再加一点随机性
+            const randIdx = Math.abs(this._hashString(today + mood)) % quotes.length;
+            return quotes[randIdx];
+        },
+
+        _hashString(str) {
+            let hash = 0;
+            for (let i = 0; i < str.length; i++) {
+                const char = str.charCodeAt(i);
+                hash = ((hash << 5) - hash) + char;
+                hash = hash & hash; // Convert to 32bit integer
+            }
+            return hash;
+        },
+
+        // ---- 每日心情卡片 ----
+        _showDailyCard(mood, content) {
+            if (!mood) mood = 'good';
+            const quote = this._getDailyQuote(mood);
+            const now = new Date();
+            const weekdays = ['星期日','星期一','星期二','星期三','星期四','星期五','星期六'];
+            const dateStr = `${now.getMonth()+1}月${now.getDate()}日`;
+            const weekday = weekdays[now.getDay()];
+            const moodEmojis = { great: '😊', good: '🙂', okay: '😐', bad: '😔', terrible: '😢' };
+            const emoji = moodEmojis[mood] || '🙂';
+
+            // 设置卡片内容
+            document.getElementById('card-date').innerHTML = 
+                `${dateStr} <span style="font-size:16px;font-weight:400;">${weekday}</span>`;
+            document.getElementById('card-mood').textContent = emoji;
+            document.getElementById('card-quote').textContent = quote;
+
+            // 设置卡片渐变主题
+            const card = document.getElementById('daily-card');
+            ['great','good','okay','bad','terrible'].forEach(m => {
+                card.classList.remove('mood-gradient-' + m);
+            });
+            card.classList.add('mood-gradient-' + mood);
+
+            // 显示卡片
+            document.getElementById('daily-card-modal').classList.remove('hidden');
+        },
+
+        _dismissDailyCard() {
+            document.getElementById('daily-card-modal').classList.add('hidden');
         },
 
         _showToast(msg) {
